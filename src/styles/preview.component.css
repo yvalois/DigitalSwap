@@ -1,0 +1,8 @@
+.container {
+  width: 100%;
+  padding: 1rem 2rem;
+}
+
+.swap-button {
+  width: auto !important;
+}

@@ -10,12 +10,14 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
+
 }
 
 .DigitalSwap{
   margin-bottom: 30px;
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 125px;
 }
 
 .footer {

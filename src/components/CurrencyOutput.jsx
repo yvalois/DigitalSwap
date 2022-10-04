@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
+//import tokenList from "../tokens/tokenList.json";
 import tokenList from "../tokens/tokenList.json";
-import { dailySymbol } from "../constants";
+import { DcopSymbol } from "../constants";
 
 const currencies = tokenList;
 
@@ -22,15 +23,15 @@ export default function SelectTextFields({ field, form, meta, ...props }) {
 
   const [currency, setCurrency] = React.useState("");
 
-  /*useEffect(() => {
-    let currencyValue = currencyInputCurrentValue !== dailySymbol
-      ? dailySymbol
-      : currency && currency !== dailySymbol
+  useEffect(() => {
+    let currencyValue = currencyInputCurrentValue !== DcopSymbol
+      ? DcopSymbol
+      : currency && currency !== DcopSymbol
       ? currency
       : currencies[0].symbol;
     setCurrency(currencyValue);
     setFieldValue(currencyValue);
-  }, [currencyInputCurrentValue]);*/
+  }, [currencyInputCurrentValue]);
 
   return (
     <Box

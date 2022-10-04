@@ -1,17 +1,17 @@
-import pegDexAbi from "./tokens/pegDex.json";
+import digitalSwapAbi from "./tokens/digitalSwap.json";
 import tokenList from "./tokens/tokenList.json";
 import tokenAbi from "./tokens/tokenAbi.json";
 import uniswapRouterAbi from "@uniswap/v2-periphery/build/UniswapV2Router02.json";
 import { ethers } from "ethers";
 import { Token, TokenAmount, Fetcher, Fraction, Percent } from "@uniswap/sdk";
 
-export const pegDexContract = new ethers.Contract(
-  "0xC6AF9710E6AadEDe2A87d90c89B43035445Cd8Dd",
-  pegDexAbi.abi
+export const digitalSwapContract = new ethers.Contract(
+  digitalSwapAbi.address,
+  digitalSwapAbi.abi
 );
 
 export const usdPriceDecimals = 8;
-export const copTokenDecimals = 18;
+export const DcopTokenDecimals = 18;
 export const usdTokenDecimals = 6;
 export const chainId = 137;
 
@@ -23,20 +23,20 @@ export function setProvider(_provider) {
   provider = _provider;
 }
 
-const copContract = tokenList.find(
+/*const copContract = tokenList.find(
   (token) => token.symbol.toUpperCase() == "DLYCOP"
-).address;
-const wETHContract = tokenList.find(
+).address;*/
+/*const wETHContract = tokenList.find(
   (token) => token.symbol.toUpperCase() === "MATIC"
-).address;
-const wBTContract = tokenList.find(
-  (token) => token.symbol.toUpperCase() === "WBTC"
+).address; */
+const uSDContract = tokenList.find(
+  (token) => token.symbol.toUpperCase() === "USDC"
 ).address;
 const usdContract = tokenList.find(
   (token) => token.symbol.toUpperCase() === "USDT"
 ).address;
-const tknContract = tokenList.find(
-  (token) => token.symbol.toUpperCase() === "DTKN"
+const DcopContract = tokenList.find(
+  (token) => token.symbol.toUpperCase() === "DCOP"
 ).address;
 
 const routerInstance = new ethers.Contract(
@@ -48,7 +48,7 @@ function usdToCop(usd, usdPrice) {
   return usd
     .mul(ethers.BigNumber.from(10).pow(usdPriceDecimals))
     .div(usdPrice)
-    .mul(ethers.BigNumber.from(10).pow(copTokenDecimals - usdTokenDecimals));
+    .mul(ethers.BigNumber.from(10).pow(DcopTokenDecimals - usdTokenDecimals));
 }
 
 function copToUsd(cop, usdPrice) {
@@ -56,7 +56,7 @@ function copToUsd(cop, usdPrice) {
     .mul(usdPrice)
     .div(
       ethers.BigNumber.from(10).pow(
-        usdPriceDecimals + copTokenDecimals - usdTokenDecimals
+        usdPriceDecimals + DcopTokenDecimals - usdTokenDecimals
       )
     );
 }
@@ -102,30 +102,43 @@ function getTokensAllowanceForPegDexFromUser(userAddress, tokenAddress) {
     tokenAbi.abi,
     provider
   );
-  return tokenContractInstance.allowance(userAddress, pegDexAbi.address);
+  return tokenContractInstance.allowance(userAddress, digitalSwapAbi.address);
 }
 
 function priceWithTRM(totalCopAmount, currentFee, usdTRM) {
-  const amountWithFee = totalCopAmount.mul(ethers.BigNumber.from(1000).sub(currentFee))
-    .div(1000);
-  return copToUsd(amountWithFee, usdTRM);
+  const amountWithFee = totalCopAmount.mul(ethers.BigNumber.from(1000).sub(3))
+    .div(100);
+  return 3000;
 }
 
-export async function calculatePriceImpact(totalCOPAmount) {
-  const pegDexWithProvider = pegDexContract.connect(provider);
+export async function calculateBurnPriceImpact(totalCOPAmount) {
+  const pegDexWithProvider = digitalSwapContract.connect(provider);
   const [currentUsdOut, currentFee, usdTRM] = await Promise.all([
     pegDexWithProvider.getAmountOutInUSD(totalCOPAmount),
-    pegDexWithProvider.fee(),
+    pegDexWithProvider.BurnFee(),
     pegDexWithProvider.getLatestPrice(),
   ]);
   const usdPriceWithTRM = priceWithTRM(totalCOPAmount, currentFee, usdTRM);
-  const fraction = new Fraction(currentUsdOut.mul(100), usdPriceWithTRM);
+  const fraction = new Fraction(currentUsdOut.mul(10), usdPriceWithTRM);
+  const result = new Fraction(100, 1).subtract(fraction);
+  return result.toFixed(2);
+}
+
+export async function calculateMintPriceImpact(totalCOPAmount) {
+  const pegDexWithProvider = digitalSwapContract.connect(provider);
+  const [currentUsdOut, currentFee, usdTRM] = await Promise.all([
+    pegDexWithProvider.getAmountOutInUSD(totalCOPAmount),
+    pegDexWithProvider.MintFee(),
+    pegDexWithProvider.getLatestPrice(),
+  ]);
+  const usdPriceWithTRM = priceWithTRM(totalCOPAmount, currentFee, usdTRM);
+  const fraction = new Fraction(currentUsdOut.mul(10), usdPriceWithTRM);
   const result = new Fraction(100, 1).subtract(fraction);
   return result.toFixed(2);
 }
 
 export async function isCOPToken(token) {
-  return token === copContract;
+  return token === DcopContract;
 }
 
 async function fromRawAmountToPresentationAndRawValue(tokenAddress, rawAmount) {
@@ -146,24 +159,26 @@ async function fromRawAmountToPresentationAndRawValue(tokenAddress, rawAmount) {
   };
 }
 
+//quitar comentarios para activar matic
+
 export async function getAmountOut(fromToken, fromTokenInput, toToken) {
-  //Acaaa
-  const contractWithProvider = pegDexContract.connect(provider);
-  if (fromToken == copContract) {
+  const contractWithProvider = digitalSwapContract.connect(provider);
+  if (fromToken == DcopContract) {
     return await fromRawAmountToPresentationAndRawValue(
       toToken,
-      await contractWithProvider.swapCOPForTokensPreview(toToken, fromTokenInput)
+      await contractWithProvider.swapDCOPForTokensPreview(toToken, fromTokenInput)
     );
     //return copToMatic(fromTokenInput);
-  } else if (fromToken != wETHContract) {
+  } /*else if (fromToken != wETHContract) {
     return await fromRawAmountToPresentationAndRawValue(
       toToken,
-      await contractWithProvider.swapTokensForCOPPreview(fromToken, fromTokenInput)
+      await contractWithProvider.swapTokensForDCOPPreview(fromToken, fromTokenInput)
     );
-  }
+  } */
   return await fromRawAmountToPresentationAndRawValue(
     toToken,
-    await contractWithProvider.swapMaticForCOPPreview(fromTokenInput)
+    // await contractWithProvider.swapMaticForDCOPPreview(fromTokenInput)
+    await contractWithProvider.swapTokensForDCOPPreview(fromToken, fromTokenInput)
   );
 }
 
@@ -186,7 +201,7 @@ export async function approveTokensToPegDex(tokenAddress, amount) {
     tokenAbi.abi,
     signer
   );
-  const tx = await contractInstance.approve(pegDexAbi.address, amount);
+  const tx = await contractInstance.approve(digitalSwapAbi.address, amount);
   const txReceipt = await provider.waitForTransaction(tx.hash, 3);
   return txReceipt.status;
 }
@@ -198,38 +213,37 @@ export async function runSwap(
   tokenOutAmount
 ) {
   const signer = provider.getSigner();
-  const pegDexWithSigner = pegDexContract.connect(signer);
+  const pegDexWithSigner = digitalSwapContract.connect(signer);
   let tx;
-  if (tokenIn === copContract) {
-    tx = await pegDexWithSigner.swapCOPForTokens(
+  if (tokenIn === DcopContract) {
+    tx = await pegDexWithSigner.swapDCOPForTokens(
       tokenOut,
       tokenInAmount,
-      getMinAmountOut(tokenOutAmount, 15),
-      await getDeadline(20)
+      getMinAmountOut(tokenOutAmount, 10),
+      await getDeadline(20),
     );
-  } else if (tokenIn !== wETHContract) {
-    tx = await pegDexWithSigner.swapTokensForCOP(
+  } else if (tokenIn == usdContract || tokenIn == usdContract ) {
+    tx = await pegDexWithSigner.swapTokensForDCOP(
       tokenIn,
       tokenInAmount,
       getMinAmountOut(tokenOutAmount, 15),
-      await getDeadline(20)
-    );
-  } else if(tokenIn == tknContract) {
+      await getDeadline(20));
+  } else if(tokenIn == DcopContract) {
     tx = await pegDexWithSigner.swapReserveToToken(
       tokenIn,
       tokenInAmount,
       getMinAmountOut(tokenOutAmount, 15),
       await getDeadline(20)
     );
-  }else{
-    tx = await pegDexWithSigner.swapMaticForCOP(
+  }/*else{
+    tx = await pegDexWithSigner.swapMaticForDCOP(
       getMinAmountOut(tokenOutAmount, 15),
       await getDeadline(20),
       {
         value: tokenInAmount,
       }
     );
-  }
+  }*/
   const txReceipt = await provider.waitForTransaction(tx.hash, 3);
   return { status: txReceipt.status, txHash: tx.hash };
 }

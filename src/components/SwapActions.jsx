@@ -19,8 +19,9 @@ import {
   approveTokensToPegDex,
   runSwap,
   isCOPToken,
-  calculatePriceImpact,
-} from "../pegDex";
+  calculateBurnPriceImpact,
+  calculateMintPriceImpact
+} from "../DigitalSwap";
 import tokenList from "../tokens/tokenList.json";
 
 import { useFormikContext, Field } from "formik";
@@ -48,9 +49,9 @@ export default function SwapActions({
     );
   };
 
-  const isValidTokenAmount = () => {
+  /* const isValidTokenAmount = () => {
     let isValidInputAmount = false;
-    if (values.currencyInput === "DLYCOP") {
+    if (values.currencyInput === "DCOP") {
       isValidInputAmount = Number(values.currencyInputAmount) >= 1000;
     } else {
       isValidInputAmount = Number(values.currencyInputAmount) > 0;
@@ -59,7 +60,7 @@ export default function SwapActions({
       isValidInputAmount &&
       Number(values.currencyInputAmount) <= Number(userBalance)
     );
-  };
+  };*/
 
   async function initSwap() {
     try {
@@ -183,7 +184,8 @@ export default function SwapActions({
   useEffect(() => {
     async function load() {
       try {
-        if (isValidTokenAmount() && txData) {
+       // if (isValidTokenAmount() && txData)
+        if ( txData) {
           const address = await provider.getSigner().getAddress();
           setUserAddress(address);
           setProvider(provider);
@@ -198,7 +200,10 @@ export default function SwapActions({
           );
           const isCopToken = await isCOPToken(txData.fromToken.address);
           if (isCopToken) {
-            const impactPercentage = await calculatePriceImpact(tokenInputAmount);
+            const impactPercentage = await calculateBurnPriceImpact(tokenInputAmount);
+            setImpactData(mapImpactStatus(impactPercentage));
+          }else{
+            const impactPercentage = await calculateMintPriceImpact(tokenInputAmount);
             setImpactData(mapImpactStatus(impactPercentage));
           }
           setFieldValue("estimated", outputAmount);
@@ -243,7 +248,7 @@ export default function SwapActions({
             ></TextField>
           )}
         />
-        {values.estimated && values.currencyInput === "DLYCOP" ? (
+        {/* values.estimated && values.currencyInput === "DCOP" ? (
           <div>
             <Chip
               icon={
@@ -261,7 +266,7 @@ export default function SwapActions({
               label={`Price Impact: ${impactData.percentageImpact}%`}
             />
           </div>
-        ) : null}
+        ) : null */}
       </Box>
       {isLloadingTx && <CircularProgress />}
       <Grid container style={{ marginTop: "0.5em" }}>
@@ -272,7 +277,8 @@ export default function SwapActions({
               disabled={
                 isLloadingTx
                   ? true
-                  : isValidTokenAmount() && !isTokenApproved
+                  //: isValidTokenAmount() && !isTokenApproved
+                  :  !isTokenApproved
                     ? false
                     : true
               }
@@ -287,16 +293,15 @@ export default function SwapActions({
             style={{ paddingLeft: "2em", paddingRight: "2em" }}
             className="swap-button"
             onClick={initSwap}
-            disabled={ false
-              /*isLloadingTx
+            disabled={ 
+              isLloadingTx
                 ? true
-                : isMaticTransaction() && isValidTokenAmount()
+                : isMaticTransaction() 
                   ? false
                   : !isMaticTransaction() &&
-                    isValidTokenAmount() &&
                     isTokenApproved
                     ? false
-                    : true*/
+                    : true
             }
             variant="contained"
           >

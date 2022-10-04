@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import { dailySymbol } from "../constants";
-
+import { DcopSymbol } from "../constants";
+//import tokenList from "../tokens/tokenList.json";
 import tokenList from "../tokens/tokenList.json";
 import { Icon } from '@mui/material';
 import { useFormikContext } from 'formik';
@@ -22,18 +22,19 @@ export default function SelectTextFields({ field, form, ...props }) {
 
   const currencyOutputCurrentValue = form.getFieldMeta("currencyOutput").value;
 
-  /*useEffect(() => {
-    let currencyValue = dailySymbol;
+  useEffect(() => {
+    let currencyValue = DcopSymbol;
 
-    if (currencyOutputCurrentValue === dailySymbol) {
-      if (values[field.name] && values[field.name]  !== dailySymbol) {
+    if (currencyOutputCurrentValue === DcopSymbol) {
+      if (values[field.name] && values[field.name]  !== DcopSymbol) {
         currencyValue = values[field.name] ;
       } else {
         currencyValue = currencies[0].symbol;
       }
     }
+
     setFieldValue(field.name, currencyValue);
-  }, [currencyOutputCurrentValue]);*/
+  }, [currencyOutputCurrentValue]);
 
 
   return (

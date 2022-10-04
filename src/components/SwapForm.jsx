@@ -20,7 +20,7 @@ import CurrencyInput from "./CurrencyInput";
 import CurrencyOutput from "./CurrencyOutput";
 import ConnectWallet from "./ConnectWallet";
 import SwapActions from "./SwapActions";
-import { dailySymbol } from "../constants";
+import { DcopSymbol } from "../constants";
 import tokenList from "../tokens/tokenList.json";
 import CurrencyAmountInput from "./CurrencyAmountInput";
 import { Web3Client } from "../utils/web3Client";
@@ -53,8 +53,10 @@ export default function SwapForm() {
     getUserAddress();
   }, [provider]);
 
+  //"address":"0x55bBCF13C2CbD4D93Ab22810f0a5025dcca3A737", pegdex 
+
   const initialValues = {
-    currencyInput: dailySymbol,
+    currencyInput: DcopSymbol,
     currencyInputAmount: 0,
     currencyOutput: tokenList[0].symbol,
   };
@@ -155,13 +157,13 @@ export default function SwapForm() {
         if (provider && Number(values.currencyInputAmount) <= 0) {
           errors.currencyInputAmount = "Provide a valid value";
         }
-        if (
+        /*if (
           provider &&
-          values.currencyInput === "DLYCOP" &&
+          values.currencyInput === "DCOP" &&
           Number(values.currencyInputAmount) < 1000
         ) {
-          errors.currencyInputAmount = "Minimun value 1000 DLYCOP";
-        }
+          errors.currencyInputAmount = "Minimun value 1000 DCOP";
+        }*/
         if (provider && Number(values.currencyInputAmount) > userBalance) {
           errors.currencyInputAmount = "Insufficient balance";
         }

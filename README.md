@@ -1,13 +1,10 @@
-# Sample Hardhat Project
+this is a simple frontend that interacts with the DigitalSwap contract which is created in ReactJS the handling of packages is with npm but it is compatible with yarn
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
 
-Try running some of the following tasks:
+# guide to run the project
 
-```shell
-npx hardhat help
-npx hardhat test
-GAS_REPORT=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+open the console in the direction of the project and write the following command:
+
+npm install
+
+then it is to run a simple npm run start

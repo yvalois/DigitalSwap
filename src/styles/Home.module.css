@@ -12,6 +12,12 @@
   align-items: center;
 }
 
+.DigitalSwap{
+  margin-bottom: 30px;
+  width: 120px;
+  height: 120px;
+}
+
 .footer {
   display: flex;
   flex: 1;

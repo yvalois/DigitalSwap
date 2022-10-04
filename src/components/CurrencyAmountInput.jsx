@@ -4,7 +4,7 @@ import TextField from "@mui/material/TextField";
 import { ethers } from "ethers";
 
 import tokenList from "../tokens/tokenList.json";
-import { getTokenBalanceForAddress, setProvider } from "../pegDex";
+import { getTokenBalanceForAddress, setProvider } from "../DigitalSwap";
 import { Button, Tooltip } from "@mui/material";
 import { useFormikContext } from "formik";
 
@@ -31,7 +31,7 @@ export default function CurrencyAmountInput({
 
   function getFormattedBalance() {
     const token = tokenList.find(
-      (token) => token.symbol == currencyInputCurrentValue
+      (token) => token.symbol === currencyInputCurrentValue
     );
     const balance = ethers.utils.formatUnits(
       expandedUserBalance,
@@ -67,8 +67,9 @@ export default function CurrencyAmountInput({
         setUserBalance(ethers.utils.formatUnits(balance, fromToken.decimals));
       }
     }
+    console.log(values)
     load();
-  }, [provider, currencyInputCurrentValue]);
+  }, [provider, currencyInputCurrentValue, values]);
 
   return (
     <Box
@@ -84,11 +85,11 @@ export default function CurrencyAmountInput({
           error={errors.currencyInputAmount ? true : false}
           id="outlined-input-currency-amount"
           label={`${currencyInputCurrentValue} amount`}
-          value={values[field.name]}
+          value={values[field.name]}   
           onChange={handleChange}
           helperText={
             !errors.currencyInputAmount
-              ? `Balance: ${getFormattedBalance()} ${values.currencyInput === 'DLYCOP' ? ' | Minimun value: 1000 DLYCOP' : ''}`
+              ? `Balance: ${getFormattedBalance()} ${values.currencyInput === 'DCOP' ? ' | Minimun value: 1000 DCOP' : ''}`
               : `${
                   errors.currencyInputAmount
                 } | Balance : ${getFormattedBalance()}`
